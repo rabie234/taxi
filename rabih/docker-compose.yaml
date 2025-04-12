@@ -57,6 +57,22 @@ services:
     ports:
       - "4002:3000"
 
+  taxi-admin-api:
+    build:
+      context: ./apps/admin-api
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - ./img:/app/uploads
+      - ./config-new:/app/config
+    environment:
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+    ports:
+      - "4001:3000"
+
   taxi-admin-panel:
     build:
       context: ./apps/admin-panel 
