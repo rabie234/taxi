@@ -1,9 +1,9 @@
 FROM node:22.10.0-alpine AS build
 WORKDIR /app
-COPY ./package.json ./package-lock.json ./decorate-angular-cli.js ./nx.json ./tsconfig.base.json ./
+COPY ./../../package.json ./../../package-lock.json ./../../decorate-angular-cli.js ./../../nx.json ./../../tsconfig.base.json ./
 RUN npm i --force
 COPY ./apps/admin-api ./apps/admin-api
-COPY ./libs/database ./libs/database
+COPY ./../../libs/database ./../../libs/database
 RUN npx nx build admin-api --prod
 
 FROM node:22.10.0-alpine
