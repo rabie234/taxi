@@ -76,7 +76,8 @@ services:
 
   taxi-admin-panel:
     build:
-      context: ./apps/admin-panel 
+      context: .               
+      dockerfile: apps/admin-panel/Dockerfile
     restart: always
     volumes:
       - taxiassets:/usr/share/nginx/html/assets
