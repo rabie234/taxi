@@ -1,0 +1,105 @@
+services:
+  mysql:
+    image: mysql:8.0.22
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysqlvol:/var/lib/mysql
+      - ./backup:/var/backup
+    environment:
+      MYSQL_ROOT_PASSWORD: defaultpassword
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis
+    volumes:
+      - redisvol:/data
+
+  taxi-rider-api:
+    build:
+      context: ./apps/rider-api # Set the directory where Dockerfile is located
+    restart: always
+    depends_on:
+      - "mysql"
+      - "redis"
+      - "taxi-admin-api"
+    volumes:
+      - ./img:/app/uploads
+      - ./config-new:/app/config
+    environment:
+      - MYSQL_HOST=mysql
+      - GATEWAY_SERVER_URL=http://x.x.x.x/payment
+      - RIDER_SERVER_URL=http://x.x.x.x/rider-api
+      - ENCRYPTION_KEY=lPw3ethAy4WqnWa3b4TAbCUJr89RifEs
+      - REDIS_HOST=redis
+    ports:
+      - "4000:3000"
+
+  taxi-driver-api:
+    build:
+      context: ./apps/driver-api
+    restart: always
+    depends_on:
+      - "mysql"
+      - "redis"
+      - "taxi-admin-api"
+    volumes:
+      - ./img:/app/uploads
+      - ./config-new:/app/config
+    environment:
+      - MYSQL_HOST=mysql
+      - GATEWAY_SERVER_URL=http://x.x.x.x/payment
+      - DRIVER_SERVER_URL=http://x.x.x.x/driver-api
+      - REDIS_HOST=redis
+      - ENCRYPTION_KEY=lPw3ethAy4WqnWa3b4TAbCUJr89RifEs
+    ports:
+      - "4002:3000"
+
+  taxi-admin-api:
+    build:
+      context: ./apps/admin-api
+    restart: always
+    depends_on:
+      - "mysql"
+      - "redis"
+    volumes:
+      - ./img:/app/uploads
+      - ./config-new:/app/config
+    environment:
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+    ports:
+      - "4001:3000"
+
+  taxi-admin-panel:
+    build:
+      context: ./apps/admin-panel 
+    restart: always
+    volumes:
+      - taxiassets:/usr/share/nginx/html/assets
+    ports:
+      - "4003:80"
+
+  nginx:
+    image: nginx
+    depends_on:
+      - "taxi-rider-api"
+      - "taxi-driver-api"
+      - "taxi-admin-panel"
+      - "taxi-admin-api"
+    volumes:
+      - ./templates:/etc/nginx/templates
+      - ./certbot:/etc/letsencrypt
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NGINX_HOST=_
+
+volumes:
+  redisvol:
+  mysqlvol:
+  taxiassets:
+
+networks:
+  bettersuite-network:
