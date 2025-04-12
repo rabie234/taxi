@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0.22
@@ -17,12 +19,12 @@ services:
 
   taxi-rider-api:
     build:
-      context: ./apps/rider-api # Set the directory where Dockerfile is located
+      context: ./apps/rider-api
     restart: always
     depends_on:
-      - "mysql"
-      - "redis"
-      - "taxi-admin-api"
+      - mysql
+      - redis
+      - taxi-admin-api
     volumes:
       - ./img:/app/uploads
       - ./config-new:/app/config
@@ -40,9 +42,9 @@ services:
       context: ./apps/driver-api
     restart: always
     depends_on:
-      - "mysql"
-      - "redis"
-      - "taxi-admin-api"
+      - mysql
+      - redis
+      - taxi-admin-api
     volumes:
       - ./img:/app/uploads
       - ./config-new:/app/config
@@ -60,8 +62,8 @@ services:
       context: ./apps/admin-api
     restart: always
     depends_on:
-      - "mysql"
-      - "redis"
+      - mysql
+      - redis
     volumes:
       - ./img:/app/uploads
       - ./config-new:/app/config
@@ -83,10 +85,10 @@ services:
   nginx:
     image: nginx
     depends_on:
-      - "taxi-rider-api"
-      - "taxi-driver-api"
-      - "taxi-admin-panel"
-      - "taxi-admin-api"
+      - taxi-rider-api
+      - taxi-driver-api
+      - taxi-admin-panel
+      - taxi-admin-api
     volumes:
       - ./templates:/etc/nginx/templates
       - ./certbot:/etc/letsencrypt
@@ -103,3 +105,4 @@ volumes:
 
 networks:
   bettersuite-network:
+    driver: bridge
