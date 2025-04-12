@@ -59,7 +59,7 @@ services:
 
   taxi-admin-api:
     build:
-      context: .               # 👈 root of the project
+      context: .               
       dockerfile: apps/admin-api/Dockerfile
     restart: always
     depends_on:
